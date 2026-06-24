@@ -1,0 +1,4 @@
+# Approve sharp's native build (a transitive Next.js dependency) so pnpm
+# doesn't warn about ignored build scripts on install.
+allowBuilds:
+  sharp: true
