@@ -2,7 +2,7 @@
 # Copy this file into the projects-templates repo to make the template
 # discoverable via `stripe projects build`. The `ref` pins a specific commit so
 # users get a deterministic snapshot; bump it when you cut a new version.
-ref: 3095525d62ba9d14522deedf90adc6f234a58e20
+ref: d9957e373206ff4376f6ba233a417a43871c844c
 repo: https://github.com/tylergoerzen-mxp/mixpanel-storefront-template
 metadata:
   name: Mixpanel Storefront
