@@ -1,22 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/lib/cart";
 import { EVENTS, identifyUser, track } from "@/lib/analytics";
 
 export default function CartPage() {
-  const { lines, subtotal, count, remove } = useCart();
+  const { lines, subtotal, count, hydrated, remove } = useCart();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const cartViewFired = useRef(false);
 
-  // Fire "Cart Viewed" once on mount.
+  // Fire "Cart Viewed" once, after hydration, so item_count/subtotal reflect a
+  // saved cart rather than the empty pre-hydration state.
   useEffect(() => {
+    if (!hydrated || cartViewFired.current) return;
+    cartViewFired.current = true;
     track(EVENTS.CART_VIEWED, { item_count: count, subtotal });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated]);
+
+  // Avoid flashing the empty-cart state before the saved cart is restored.
+  if (!hydrated) return null;
 
   async function handleCheckout() {
     setLoading(true);

@@ -13,6 +13,10 @@ type CartContextValue = {
   lines: CartLine[];
   count: number;
   subtotal: number;
+  /** True once the cart has been restored from localStorage. Effects that read
+   * the cart (e.g. revenue events) must wait for this to avoid reading [] on
+   * the first render before hydration runs. */
+  hydrated: boolean;
   add: (product: Product, source?: string) => void;
   remove: (productId: string) => void;
   clear: () => void;
@@ -50,6 +54,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       lines,
       count,
       subtotal,
+      hydrated,
       add: (product, source = "unknown") => {
         setLines((current) => {
           const existing = current.find((line) => line.product.id === product.id);
@@ -84,7 +89,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       },
       clear: () => setLines([]),
     };
-  }, [lines]);
+  }, [lines, hydrated]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

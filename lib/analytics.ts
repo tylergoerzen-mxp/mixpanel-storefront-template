@@ -8,13 +8,11 @@ import mixpanel from "mixpanel-browser";
  * when you open Mixpanel and build a funnel report.
  */
 export const EVENTS = {
-  PAGE_VIEWED: "Page Viewed",
   PRODUCT_LIST_VIEWED: "Product List Viewed",
   PRODUCT_VIEWED: "Product Viewed",
   PRODUCT_ADDED: "Product Added to Cart",
   PRODUCT_REMOVED: "Product Removed from Cart",
   CART_VIEWED: "Cart Viewed",
-  SEARCH_PERFORMED: "Search Performed",
   CHECKOUT_STARTED: "Checkout Started",
   ORDER_COMPLETED: "Order Completed",
 } as const;
@@ -55,11 +53,13 @@ export function initAnalytics(token: string | null, apiHost?: string | null): bo
   }
 
   mixpanel.init(token, {
-    // Capture clicks, pageviews, inputs, and scroll depth automatically, on top
-    // of the explicit events the app fires. This is what makes "click around
-    // and watch events stream" work out of the box.
-    autocapture: true,
-    track_pageview: true,
+    // Autocapture clicks/inputs/submits so even un-instrumented UI shows up in
+    // the stream — the "click around and watch events appear" magic. Pageviews
+    // are handled by track_pageview below instead, so we disable autocapture's
+    // pageview to avoid double-counting. The explicit funnel events the app
+    // fires (Product Viewed, Added to Cart, …) sit on top of this.
+    autocapture: { pageview: false, click: true, input: true, submit: true, scroll: true },
+    track_pageview: "url-with-path",
     persistence: "localStorage",
     ...(apiHost ? { api_host: apiHost } : {}),
   });

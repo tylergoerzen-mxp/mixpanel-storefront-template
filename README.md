@@ -30,7 +30,9 @@ That's it. The app runs with **zero configuration** — it ships with a bundled 
 | **Vercel** | `vercel/project` | One-click hosting / `pnpm deploy` |
 | **Stripe Checkout** | _(optional, your keys)_ | Real payments; demo mode otherwise |
 
-All three Projects services run on **free tiers**.
+All three Projects services run on **free tiers**. Vercel is a *deploy target* used by `pnpm deploy` (via the Vercel CLI), not a runtime dependency — the app itself reads only Mixpanel and (optionally) Supabase at runtime.
+
+> **Two event streams, on purpose.** The app fires explicit, semantic funnel events (`Product Viewed`, `Product Added to Cart`, …) that you build reports on, *and* enables Mixpanel autocapture for clicks/inputs so even un-instrumented UI shows up as you click around. Pageviews come from `track_pageview` only (autocapture's pageview is disabled) so they aren't double-counted. Build funnels on the semantic events; treat autocaptured events as the ambient stream.
 
 ---
 

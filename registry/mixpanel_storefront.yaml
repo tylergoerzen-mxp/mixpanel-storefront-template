@@ -1,0 +1,32 @@
+# Entry for the `projects-templates` catalog.
+# Copy this file into the projects-templates repo to make the template
+# discoverable via `stripe projects build`. The `ref` pins a specific commit so
+# users get a deterministic snapshot; bump it when you cut a new version.
+ref: 3095525d62ba9d14522deedf90adc6f234a58e20
+repo: https://github.com/tylergoerzen-mxp/mixpanel-storefront-template
+metadata:
+  name: Mixpanel Storefront
+  description: >-
+    Next.js storefront where every click streams an event into Mixpanel.
+    Wired with Mixpanel analytics, an optional Supabase product catalog, and
+    Vercel hosting — runs with zero config and shows a full purchase funnel.
+  owner: mixpanel
+  official: false
+  tags:
+    - nextjs
+    - ecommerce
+    - storefront
+    - analytics
+    - mixpanel
+    - supabase
+    - vercel
+    - stripe-checkout
+template_id: mixpanel_storefront
+commands:
+  install: pnpm install
+  dev: pnpm dev
+  deploy: pnpm deploy
+services:
+  - mixpanel/analytics
+  - supabase/project
+  - vercel/project

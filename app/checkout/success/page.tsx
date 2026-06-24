@@ -7,15 +7,19 @@ import { useCart } from "@/lib/cart";
 import { EVENTS, track } from "@/lib/analytics";
 
 function SuccessInner() {
-  const { lines, subtotal, clear } = useCart();
+  const { lines, subtotal, hydrated, clear } = useCart();
   const searchParams = useSearchParams();
   const [orderId] = useState(() => `order_${Math.random().toString(36).slice(2, 10)}`);
   const fired = useRef(false);
 
-  // Fire the revenue event exactly once, using the cart as it stands on arrival
-  // (it survives the Stripe redirect via localStorage), then clear it.
+  // Fire the revenue event exactly once, AFTER the cart hydrates from
+  // localStorage (it survives the Stripe redirect there), then clear it.
+  // Waiting on `hydrated` is what keeps revenue from reporting 0 — the cart is
+  // empty on the very first render, before hydration copies storage into state.
   useEffect(() => {
-    if (fired.current) return;
+    if (!hydrated || fired.current) return;
+    // Direct navigation with no cart: nothing to report.
+    if (lines.length === 0) return;
     fired.current = true;
 
     const isDemo = searchParams.get("demo") === "1";
@@ -28,7 +32,7 @@ function SuccessInner() {
     });
     clear();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated, lines, subtotal]);
 
   return (
     <div className="py-20 text-center">
