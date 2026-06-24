@@ -35,6 +35,22 @@ let enabled = false;
 let counter = 0;
 
 /**
+ * Translate the provider's server ingestion URL into the CORS-enabled host the
+ * BROWSER SDK needs. The injected MIXPANEL_INGESTION_URL is the server endpoint
+ * (e.g. https://api.mixpanel.com), which browsers can't post to cross-origin.
+ * The browser SDK uses https://api-js.mixpanel.com for US by default, and
+ * https://api-eu/api-in for EU/IN — so we only override for EU/IN and leave US
+ * to the SDK default.
+ */
+function browserApiHost(ingestionUrl?: string | null): string | null {
+  if (!ingestionUrl) return null;
+  const url = ingestionUrl.toLowerCase();
+  if (url.includes("api-eu")) return "https://api-eu.mixpanel.com";
+  if (url.includes("api-in")) return "https://api-in.mixpanel.com";
+  return null; // US (api.mixpanel.com) → use the browser SDK default.
+}
+
+/**
  * Initialize the Mixpanel browser SDK. Safe to call more than once and safe to
  * call with a null token — without a token the storefront still runs and the
  * live activity feed still works, the events just aren't shipped to Mixpanel.
@@ -52,6 +68,8 @@ export function initAnalytics(token: string | null, apiHost?: string | null): bo
     return false;
   }
 
+  const browserHost = browserApiHost(apiHost);
+
   mixpanel.init(token, {
     // Autocapture clicks/inputs/submits so even un-instrumented UI shows up in
     // the stream — the "click around and watch events appear" magic. Pageviews
@@ -61,7 +79,7 @@ export function initAnalytics(token: string | null, apiHost?: string | null): bo
     autocapture: { pageview: false, click: true, input: true, submit: true, scroll: true },
     track_pageview: "url-with-path",
     persistence: "localStorage",
-    ...(apiHost ? { api_host: apiHost } : {}),
+    ...(browserHost ? { api_host: browserHost } : {}),
   });
   enabled = true;
   return true;

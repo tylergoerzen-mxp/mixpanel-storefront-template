@@ -9,8 +9,19 @@ import { EVENTS, track } from "@/lib/analytics";
 function SuccessInner() {
   const { lines, subtotal, hydrated, clear } = useCart();
   const searchParams = useSearchParams();
-  const [orderId] = useState(() => `order_${Math.random().toString(36).slice(2, 10)}`);
+  // Generated client-side only (after mount). Starting null keeps the server
+  // and first client render identical, avoiding a hydration mismatch from the
+  // random id. The ref holds it for the event even before state commits.
+  const orderIdRef = useRef<string | null>(null);
+  const [orderId, setOrderId] = useState<string | null>(null);
   const fired = useRef(false);
+
+  useEffect(() => {
+    if (!orderIdRef.current) {
+      orderIdRef.current = `order_${Math.random().toString(36).slice(2, 10)}`;
+      setOrderId(orderIdRef.current);
+    }
+  }, []);
 
   // Fire the revenue event exactly once, AFTER the cart hydrates from
   // localStorage (it survives the Stripe redirect there), then clear it.
@@ -24,7 +35,7 @@ function SuccessInner() {
 
     const isDemo = searchParams.get("demo") === "1";
     track(EVENTS.ORDER_COMPLETED, {
-      order_id: orderId,
+      order_id: orderIdRef.current,
       revenue: subtotal,
       item_count: lines.reduce((sum, line) => sum + line.quantity, 0),
       items: lines.map((line) => line.product.name),
@@ -41,7 +52,7 @@ function SuccessInner() {
       </div>
       <h1 className="text-3xl font-bold">Order confirmed</h1>
       <p className="mt-2 text-slate-500">
-        Order <span className="font-mono">{orderId}</span> is on its way.
+        Order <span className="font-mono">{orderId ?? "…"}</span> is on its way.
       </p>
       <p className="mt-1 text-sm text-slate-400">
         An <span className="font-semibold">Order Completed</span> event with revenue just streamed
