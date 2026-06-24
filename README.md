@@ -104,6 +104,17 @@ data/products.ts      bundled catalog (runs with zero config)
 supabase/migrations/  products table schema + seed
 ```
 
+## Troubleshooting
+
+**The Live events panel shows events, but nothing appears in Mixpanel.**
+The panel reflects local `track()` calls, so it lights up even when the network request fails. The usual cause is an **ad blocker or browser tracking protection** (uBlock, Brave shields, Safari ITP, etc.) — `mixpanel.com` is on every blocklist, so the requests are dropped before they leave the browser. Test in a **private/incognito window** (extensions are usually off), or allowlist `localhost`. To confirm, open DevTools → Network, filter for `mixpanel`, and click around: a blocked request shows as failed / `ERR_BLOCKED_BY_CLIENT`, a delivered one returns `200` from `api-js.mixpanel.com`.
+
+**Events still don't arrive (no ad blocker).**
+Check you're viewing the right Mixpanel project (the one provisioned for this app, not your default), and that its Events view time filter is set to "Today / Live." The browser SDK posts to `api-js.mixpanel.com` (US) by default; for EU/IN projects the app reads `MIXPANEL_INGESTION_URL` and points the SDK at the right regional host automatically.
+
+**`Order Completed` revenue is 0.**
+That was a fixed bug (the event fired before the cart restored from localStorage). If you see it, make sure you're on the latest commit.
+
 ## License
 
 MIT — see [LICENSE](./LICENSE).
