@@ -37,7 +37,9 @@ function SuccessInner() {
     track(EVENTS.ORDER_COMPLETED, {
       order_id: orderIdRef.current,
       revenue: subtotal,
+      currency: "USD",
       item_count: lines.reduce((sum, line) => sum + line.quantity, 0),
+      product_ids: lines.map((line) => line.product.id),
       items: lines.map((line) => line.product.name),
       mode: isDemo ? "demo" : "stripe",
     });

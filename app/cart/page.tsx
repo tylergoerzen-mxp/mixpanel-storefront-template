@@ -36,6 +36,7 @@ export default function CartPage() {
     track(EVENTS.CHECKOUT_STARTED, {
       item_count: count,
       subtotal,
+      product_ids: lines.map((line) => line.product.id),
       items: lines.map((line) => line.product.name),
     });
 
