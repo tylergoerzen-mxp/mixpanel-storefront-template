@@ -89,7 +89,11 @@ export function initAnalytics(token: string | null, apiHost?: string | null): bo
 export function track(name: string, props: Record<string, unknown> = {}): void {
   if (typeof window === "undefined") return;
   if (enabled) {
-    mixpanel.track(name, props);
+    try {
+      mixpanel.track(name, props);
+    } catch {
+      // Swallow tracking errors to avoid crashing the UI.
+    }
   }
   const event: TrackedEvent = {
     id: `${Date.now()}-${counter++}`,
